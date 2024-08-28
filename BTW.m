@@ -1,25 +1,31 @@
-function [event_size,z] = BTW (L, steps, wait)
-
-    arguments
-        L (1,1) double = 50
-        steps (1,1) double = 10e4
-        wait (1,1) double = 10e3
-    end
+% function [event_size,z] = BTW (L, steps, wait,z,event_size)
+% 
+%     arguments
+%         L (1,1) double = 50
+%         steps (1,1) double = 10e4
+%         wait (1,1) double = 10e3
+%     end
 
 %Initialization
 
 %Parameters
 %rng(0, 'twister');							% Sets the seed and uses Mersenne Twister.
-q = 4;												% Coordination number
+q = 4;
 z_c = q - 1;										% Critical height
 
 %Creating the lattice (with absorbing boundaries)
 L_b = L + 2;										% Length with abs. boundaries
-z = randi([0 z_c-1],L);						% Lattice
+
+% Create the lattice if it wasn't passed down as a variable
+if ~exist('z','var'); z = randi([0 z_c],L);
+elseif numel(z) ~= L^2; error("Lattice dimensions don't match"); end
+
+if ~exist('event_size','var'); event_size = zeros(steps,1);
+elseif size(event_size,2) ~= 1; error("Event size vector doesn't match"); end
+
 
 active_sites = [];
 events = 0;
-event_size = zeros(steps,1);
 added = 0;
 
 %Nearest neightbors
@@ -69,27 +75,13 @@ while events < steps + wait
         delta(d_as) = delta(d_as) + 1;
 
         z = z + delta(2:L+1,2:L+1);
-
-        % % IMPLEMENTATION WITH SPARSE MATRIX
-        % neighbors = [nn_l(active_sites); nn_r(active_sites); nn_u(active_sites); nn_d(active_sites)];
-        % [neighbors, ~, idx] = unique(neighbors);
-        % grains = accumarray(idx, 1);
-        % [x, y] = ind2sub([L_b,L_b],neighbors);
-        % delta = sparse(x,y,grains,L_b,L_b);
-        % z_inner = z_inner + delta(2:L+1,2:L+1);
-
-        
+       
         active_sites = find(z>z_c);		% Find newly activated sites
-
-		% % IMPLEMENTATION SEARCHING ONLY MODIFIED SITES
-        % j = find(delta(2:L+1,2:L+1));
-        % active_sites = j(z(j)>z_c);
-
-        break
 
     end
 	events = events + 1;
     event_size(events) = count;
 end
 
-event_size = event_size(wait:end);
+% end
+event_size = event_size(wait+1:end);

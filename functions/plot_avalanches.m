@@ -52,10 +52,12 @@ function [fig] = plot_avalanches(x, y, xline1, xline2, titleText)
   axis tight;
 
   % Prepare the fit equation for the legend
-  fit_eqn = sprintf('Fit: $y = %.2f \\cdot x^{%.2f}$', 10^p(2), p(1));
+  %fit_eqn = sprintf('Fit: $y = %.2f \\cdot x^{%.2f}$', 10^p(2), p(1));
+  fit_eqn = sprintf('Fit: $y = c x^{%.2f}$', p(1));
 
-  % Add a legend for the scatter data, vertical lines, and fit line
-  legend({'Data', sprintf('%.2f', xline1), sprintf('%.2f', xline2), fit_eqn}, ...
+
+  % Add a legend for the vertical lines and fit line (skip the first entry)
+  legend({'', sprintf('x = %.0f', xline1), sprintf('x = %.0f', xline2), fit_eqn}, ...
   'Interpreter', 'latex', 'FontSize', 12, 'Location', 'best');
 
   hold off;
