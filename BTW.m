@@ -10,8 +10,7 @@ steps = 1000000;
 
 %Creating the lattice (with absorbing boundaries)
 L_b = L + 2;										% Length with abs. boundaries
-z_b = randi([0 z_c-1],L_b);				% Lattice with boundaries
-z = z_b(2:L+1,2:L+1);						% Lattice
+z = randi([0 z_c-1],L);						% Lattice
 
 active_sites = [];
 events = 0;
@@ -53,9 +52,7 @@ while events < steps
 		z(active_sites) = z(active_sites) - q;
 
         % Sites to the (l/r/u/d) of an active site
-
-        %MAYBE FASTER WITHOUT PREALLOCATING
-        l_as = nn_l(active_sites);
+		l_as = nn_l(active_sites);
         r_as = nn_r(active_sites);
         u_as = nn_u(active_sites);
         d_as = nn_d(active_sites);
