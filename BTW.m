@@ -1,13 +1,14 @@
-% function [event_size,z] = BTW (L, steps, wait,z,event_size)
-% 
-%     arguments
-%         L (1,1) double = 50
-%         steps (1,1) double = 10e4
-%         wait (1,1) double = 10e3
-%     end
+function [event_size,z] = BTW (L, steps, wait,z)
+
+    arguments
+        L (1,1) double = 50
+        steps (1,1) double = 10e4
+        wait (1,1) double = 10e3
+		z (:,:) double = randi([0 3],L)
+    end
 
 %Initialization
-model = "BTW";
+
 %Parameters
 %rng(0, 'twister');							% Sets the seed and uses Mersenne Twister.
 q = 4;
@@ -16,11 +17,8 @@ wait_tmp = wait;
 %Creating the lattice (with absorbing boundaries)
 L_b = L + 2;										% Length with abs. boundaries
 
-% Create the lattice if it wasn't passed down as a variable
-if ~exist('z','var'); z = randi([0 z_c],L);
-elseif numel(z) ~= L^2; error("Lattice dimensions don't match");
-else; wait_tmp = 0;
-end
+% No termalization if lattice is passed down
+if exist('z','var'); wait_tmp = 0; end
 
 % % MOVED CONCATENATION TO PARENT SCRIPT
 % previous_events = 0;
@@ -29,7 +27,6 @@ end
 % else; previous_events = numel(event_size); event_size = [event_size; zeros(steps,1)];
 % end
 event_size = zeros(steps,1);
-
 
 active_sites = [];
 events = 0;
@@ -91,3 +88,4 @@ end
 % end
 
 if wait_tmp ~= 0; event_size = event_size(wait_tmp+1:end); end
+end
