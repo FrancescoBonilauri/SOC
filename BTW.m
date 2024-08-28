@@ -4,14 +4,15 @@
 L = 20;                 % Size of lattice
 q = 4;                  % Coordination number
 z_c = q - 1;                % Critical height
-steps = 1000000;
+steps = 100000;
 
 
 %Creating the lattice (with absorbing boundaries)
 L_b = L + 2;            % Length with abs. boundary
 z = randi([0 z_c-1],L_b);
-as = [];                % Active sites indexes
-as_r = [];
+z_inner = z(2:L+1,2:L+1);
+%as = [];                % Active sites indexes
+%as_r = [];
 lin_as_r = [];
 events = 0;
 added = 0;
@@ -33,14 +34,14 @@ while events < steps
     %Drive loop
     event_size = 0;
     while isempty(lin_as_r) == true
-        x = randi([2, L+1]);
-        y = randi([2, L+1]);    % Random site
-        if z(x,y) == z_c    % Mark as active if needed
+        lin_as_r = randi(L^2);
+        %y = randi(L);    % Random site
+        if z_inner(lin_as_r) == z_c    % Mark as active if needed
             %as = [x,y];
-            as_r = [x,y] - 1;
-            lin_as_r = sub2ind([L,L],as_r(:,1),as_r(:,2));
+            %as_r = [x,y] - 1;
+            %lin_as_r = sub2ind([L,L],as_r(:,1),as_r(:,2));
         end
-        z(x,y) = z(x,y) + 1;
+        z_inner(lin_as_r) = z_inner(lin_as_r) +1;
 
         added = added + 1;
     end
@@ -72,36 +73,51 @@ while events < steps
         %lin_as = sub2ind([L_b,L_b],as(:,1),as(:,2));
         %lin_as_r = sub2ind([L,L],as_r(:,1),as_r(:,2));
 
-        z_temp = z(2:L+1,2:L+1);
+        %z_inner = z(2:L+1,2:L+1);
 
-        z_temp(lin_as_r) = z_temp(lin_as_r)-q;
+        z_inner(lin_as_r) = z_inner(lin_as_r)-q;
 
         % Sites to the (l/r/u/d) of an active site
 
         %MAYBE FASTER WITHOUT PREALLOCATING
-        l_as = nn_l(lin_as_r);
-        r_as = nn_r(lin_as_r);
-        u_as = nn_u(lin_as_r);
-        d_as = nn_d(lin_as_r);
+        % l_as = nn_l(lin_as_r);
+        % r_as = nn_r(lin_as_r);
+        % u_as = nn_u(lin_as_r);
+        % d_as = nn_d(lin_as_r);
 
-        % Increment
-        %SPARSE?
+        %Increment
         delta = zeros(L_b,L_b);
         delta(l_as) = delta(l_as) + 1;
         delta(r_as) = delta(r_as) + 1;
         delta(u_as) = delta(u_as) + 1;
         delta(d_as) = delta(d_as) + 1;
-        z(2:L+1,2:L+1) = z_temp;
-        z = z + delta;
-        z_temp = z(2:L+1,2:L+1);
-        as_r = [];
+        %z(2:L+1,2:L+1) = z_inner;
+        z_inner = z_inner + delta(2:L+1,2:L+1);
+        %z_inner = z(2:L+1,2:L+1);
+        %as_r = [];
+
+
+        %IMPLEMENTATIONS WITH SPARSE MATRIX
+        % neighbors = [nn_l(lin_as_r); nn_r(lin_as_r); nn_u(lin_as_r); nn_d(lin_as_r)];
+        % [neighbors, ~, idx] = unique(neighbors);
+        % grains = accumarray(idx, 1);
+        % [x, y] = ind2sub([L_b,L_b],neighbors);
+        % delta = sparse(x,y,grains,L_b,L_b);
+        % z_inner = z_inner + delta(2:L+1,2:L+1);
+
+        
+        % 
+        % lin_as_r = neighbors(z_inner(neighbors)>z_c);
+
+
+
         %BUG
         %[as_r(:,1), as_r(:,2)]
 
-        lin_as_r = find(z_temp>z_c);
+        lin_as_r = find(z_inner>z_c);
 
         % j = find(delta(2:L+1,2:L+1));
-        % lin_as_r = j(z_temp(j)>z_c);
+        % lin_as_r = j(z_inner(j)>z_c);
 
 
 
@@ -123,11 +139,7 @@ while events < steps
 
 end
 
-dropped = sum(z(1,:)+z(L+2,:)) + sum(z(2:L+1,1)+z(2:L+1,L+2))
-not_dropped = sum(z(2:L+1,2:L+1),"all")
+not_dropped = sum(z_inner,"all")
 added
-sum(z,"all")-added
-max(event_size)
-
 
 
