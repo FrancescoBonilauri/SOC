@@ -7,26 +7,32 @@
 %     end
 
 %Initialization
-
+model = "BTW";
 %Parameters
 %rng(0, 'twister');							% Sets the seed and uses Mersenne Twister.
 q = 4;
 z_c = q - 1;										% Critical height
-
+wait_tmp = wait;
 %Creating the lattice (with absorbing boundaries)
 L_b = L + 2;										% Length with abs. boundaries
 
 % Create the lattice if it wasn't passed down as a variable
 if ~exist('z','var'); z = randi([0 z_c],L);
-elseif numel(z) ~= L^2; error("Lattice dimensions don't match"); end
+elseif numel(z) ~= L^2; error("Lattice dimensions don't match");
+else; wait_tmp = 0;
+end
 
-if ~exist('event_size','var'); event_size = zeros(steps,1);
-elseif size(event_size,2) ~= 1; error("Event size vector doesn't match"); end
+% % MOVED CONCATENATION TO PARENT SCRIPT
+% previous_events = 0;
+% if ~exist('event_size','var'); event_size = zeros(steps,1);
+% elseif size(event_size,2) ~= 1; error("Event size vector doesn't match");
+% else; previous_events = numel(event_size); event_size = [event_size; zeros(steps,1)];
+% end
+event_size = zeros(steps,1);
 
 
 active_sites = [];
 events = 0;
-added = 0;
 
 %Nearest neightbors
 nn_l=circshift(reshape(1:L_b^2,L_b,L_b),-1,1);
@@ -40,7 +46,7 @@ nn_u=nn_u(2:end-1,2:end-1);
 nn_d=nn_d(2:end-1,2:end-1);
 
 %Simulation
-while events < steps + wait
+while events < steps + wait_tmp
 
     %Drive loop
     count = 0;
@@ -53,12 +59,11 @@ while events < steps + wait
         end
 
 		z(i) = z(i) + 1;							% Drop one grain
-        added = added + 1;
     end
 
     %Relaxation loop
     while isempty(active_sites) == false
-        count = count + size(active_sites,1);
+        count = count + numel(active_sites);
 		z(active_sites) = z(active_sites) - q;
 
         % Sites to the (l/r/u/d) of an active site
@@ -84,4 +89,5 @@ while events < steps + wait
 end
 
 % end
-event_size = event_size(wait+1:end);
+
+if wait_tmp ~= 0; event_size = event_size(wait_tmp+1:end); end

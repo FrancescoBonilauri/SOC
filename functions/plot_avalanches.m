@@ -1,4 +1,4 @@
-function [fig,exponent] = plot_avalanches(x, y, xline1, xline2, titleText)
+function [fig,exponent] = plot_avalanches(x, y, xline1, xline2, titleText, subtitleText)
 % Inputs:
 % x - x-axis data
 % y - y-axis data
@@ -47,7 +47,8 @@ set(gca, 'TickLabelInterpreter', 'latex');  % Use LaTeX interpreter for tick lab
 set(gca, 'XMinorTick', 'on');
 
 % Title and labels with LaTeX interpreter
-title(titleText, 'Interpreter', 'latex', 'FontSize', 16);
+title(titleText,'Interpreter', 'latex', 'FontSize', 16);
+subtitle(subtitleText, 'Interpreter', 'latex', 'FontSize', 14);
 xlabel(xlabelText, 'Interpreter', 'latex', 'FontSize', 14);
 ylabel(ylabelText, 'Interpreter', 'latex', 'FontSize', 14);
 
