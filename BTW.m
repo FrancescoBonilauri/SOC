@@ -1,12 +1,17 @@
+function [event_size,z] = BTW (L, steps, wait)
+
+    arguments
+        L (1,1) double = 50
+        steps (1,1) double = 10e4
+        wait (1,1) double = 10e3
+    end
+
 %Initialization
 
 %Parameters
 %rng(0, 'twister');							% Sets the seed and uses Mersenne Twister.
-L = 50;												% Size of lattice
 q = 4;												% Coordination number
 z_c = q - 1;										% Critical height
-steps = 1000000;
-wait = 1000;
 
 %Creating the lattice (with absorbing boundaries)
 L_b = L + 2;										% Length with abs. boundaries
@@ -48,8 +53,6 @@ while events < steps + wait
     %Relaxation loop
     while isempty(active_sites) == false
         count = count + size(active_sites,1);
-        events = events + 1;
-
 		z(active_sites) = z(active_sites) - q;
 
         % Sites to the (l/r/u/d) of an active site
@@ -85,18 +88,8 @@ while events < steps + wait
         break
 
     end
-
+	events = events + 1;
     event_size(events) = count;
 end
 
 event_size = event_size(wait:end);
-
-
-not_dropped = sum(z,"all")
-added
-
-
-
-[sizes, count] = postprocess_data(event_size);
-title = "L = "+L+", t= "+steps;
-[fig] = plot_avalanches(sizes,count,2,40,title)

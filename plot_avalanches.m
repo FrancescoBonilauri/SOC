@@ -6,7 +6,7 @@ function [fig] = plot_avalanches(x, y, xline1, xline2, titleText)
     % xline2 - position of the second vertical dotted line
     % titleText - title of the graph
 
-  ylabelText = "p(s)";
+  ylabelText = "Count";
   xlabelText = "Avalanche size";
 
   % Create a figure and scatter plot in log-log scale
