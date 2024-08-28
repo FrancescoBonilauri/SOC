@@ -2,11 +2,11 @@
 
 %Parameters
 %rng(0, 'twister');							% Sets the seed and uses Mersenne Twister.
-L = 20;												% Size of lattice
+L = 50;												% Size of lattice
 q = 4;												% Coordination number
 z_c = q - 1;										% Critical height
 steps = 1000000;
-
+wait = 1000;
 
 %Creating the lattice (with absorbing boundaries)
 L_b = L + 2;										% Length with abs. boundaries
@@ -14,6 +14,7 @@ z = randi([0 z_c-1],L);						% Lattice
 
 active_sites = [];
 events = 0;
+event_size = zeros(steps,1);
 added = 0;
 
 %Nearest neightbors
@@ -28,13 +29,13 @@ nn_u=nn_u(2:end-1,2:end-1);
 nn_d=nn_d(2:end-1,2:end-1);
 
 %Simulation
-while events < steps
+while events < steps + wait
 
     %Drive loop
-    event_size = 0;
+    count = 0;
     while isempty(active_sites) == true
        
-		i = randi(L^2);							% Random site
+		i = randi(L^2);					    		% Random site
 
         if z(i) == z_c							% Mark as (about to be) active if needed
 			active_sites = i;
@@ -46,7 +47,7 @@ while events < steps
 
     %Relaxation loop
     while isempty(active_sites) == false
-        event_size = event_size + size(active_sites,1);
+        count = count + size(active_sites,1);
         events = events + 1;
 
 		z(active_sites) = z(active_sites) - q;
@@ -85,7 +86,17 @@ while events < steps
 
     end
 
+    event_size(events) = count;
 end
+
+event_size = event_size(wait:end);
+
 
 not_dropped = sum(z,"all")
 added
+
+
+
+[sizes, count] = postprocess_data(event_size);
+title = "L = "+L+", t= "+steps;
+[fig] = plot_avalanches(sizes,count,2,40,title)
