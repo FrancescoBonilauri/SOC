@@ -1,4 +1,4 @@
-function [event_size,event_duration,z] = Manna (L, steps, wait,z)
+function [event_size,event_duration,z] = Manna_abellian (L, steps, wait,z)
 
 arguments
 	L (1,1) double = 50
@@ -10,8 +10,9 @@ end
 % Initialization
 
 % Parameters
+q = 2;
 % Critical height
-z_c = 3;
+z_c = q - 1;
 wait_tmp = wait;
 % Creating the lattice (with absorbing boundaries)
 L_b = L + 2;
@@ -57,6 +58,7 @@ while events < steps + wait_tmp
 		n_as = size(active_sites,1); % Number of active sites
 		count = count + n_as;
 		duration = duration +1;
+		z(active_sites) = z(active_sites) - q;
 
 		% Sites to the (l/r/u/d) of an active site
 		nn = zeros(4,n_as);
@@ -66,39 +68,17 @@ while events < steps + wait_tmp
 		nn(4,:) = nn_d(active_sites);
 
 		% Stocasticity
+		% Generate random dice_roll indices
+		dice_roll = randi([1 4], q*n_as,1);
 
-		q = z(active_sites);
-
-		% % n_q = max(z(active_sites));
-		% % dice_roll = nan(n_q,n_as);
-		% % for i = 1:n_as
-		% % dice_roll(1:q(i),i) = randi([1 4], q(i), 1);
-		% % end
-		% % % Convert dice_roll indices to linear indices for matrix nn
-		% % row_indices = reshape(dice_roll + (0:n_as-1) * size(nn, 1),n_q*n_as,1);
-		% % % Get the selected elements in a vectorized manner
-		% % nn = nn(rmmissing(row_indices));
-
-		% n_q = max(z(active_sites));
-		% row_indices = [];
-		% for i = 1:n_as
-		% row_indices = [row_indices; randi([1 4], q(i), 1) + (i-1)*size(nn,1)];
-		% end
-		% % Get the selected elements in a vectorized manner
-		% nn = nn(row_indices);
-
-		dice_roll = randi([1 4], sum(q), 1);
+		% Convert dice_roll indices to linear indices for matrix nn
 		offsets = repelem((0:n_as-1) * size(nn, 1), q)';
 		row_indices = dice_roll + offsets;
 		% Get the selected elements in a vectorized manner
 		nn = nn(row_indices);
 
-
-		% Topple
-		z(active_sites) = 0;
-
 		% Increment
-		delta_flat = accumarray(nn,ones(numel(nn),1),[L_b^2 1]);
+		delta_flat = accumarray(nn,ones(n_as*q,1),[L_b^2 1]);
 		delta = reshape(delta_flat,L_b,L_b);
 		z = z + delta(2:L+1,2:L+1);
 
