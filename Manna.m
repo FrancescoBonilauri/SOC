@@ -1,37 +1,31 @@
-function [event_size,z] = Manna (L, steps, wait,z)
+function [event_size,event_duration,z] = Manna (L, steps, wait,z)
 
-    arguments
-        L (1,1) double = 50
-        steps (1,1) double = 10e4
-        wait (1,1) double = 10e3
-		z (:,:) double = randi([0 3],L)
-    end
+arguments
+	L (1,1) double = 50
+	steps (1,1) double = 10e4
+	wait (1,1) double = 10e3
+	z (:,:) double = randi([0 3],L)
+end
 
-%Initialization
+% Initialization
 
-%Parameters
-%rng(0, 'twister');							% Sets the seed and uses Mersenne Twister.
+% Parameters
 q = 4;
-z_c = q - 1;										% Critical height
+% Critical height
+z_c = q - 1;
 wait_tmp = wait;
-%Creating the lattice (with absorbing boundaries)
-L_b = L + 2;										% Length with abs. boundaries
+% Creating the lattice (with absorbing boundaries)
+L_b = L + 2;
 
 % No termalization if lattice is passed down
-if exist('z','var'); wait_tmp = 0; end
+if nargin>3; wait_tmp = 0; end
 
-% % MOVED CONCATENATION TO PARENT SCRIPT
-% previous_events = 0;
-% if ~exist('event_size','var'); event_size = zeros(steps,1);
-% elseif size(event_size,2) ~= 1; error("Event size vector doesn't match");
-% else; previous_events = numel(event_size); event_size = [event_size; zeros(steps,1)];
-% end
-event_size = zeros(steps,1);
-
+event_size = zeros(steps+wait_tmp,1);
+event_duration = zeros(steps+wait_tmp,1);
 active_sites = [];
 events = 0;
 
-%Nearest neightbors
+% Nearest neightbors
 nn_l=circshift(reshape(1:L_b^2,L_b,L_b),-1,1);
 nn_r=circshift(reshape(1:L_b^2,L_b,L_b),1,1);
 nn_u=circshift(reshape(1:L_b^2,L_b,L_b),-1,2);
@@ -42,11 +36,12 @@ nn_r=nn_r(2:end-1,2:end-1);
 nn_u=nn_u(2:end-1,2:end-1);
 nn_d=nn_d(2:end-1,2:end-1);
 
-%Simulation
+% Simulation
 while events < steps + wait_tmp
 
 	%Drive loop
 	count = 0;
+	duration = 0;
 	while isempty(active_sites) == true
 
 		i = randi(L^2);					    	% Random site
@@ -58,10 +53,11 @@ while events < steps + wait_tmp
 		z(i) = z(i) + 1;							% Drop one grain
 	end
 
-	%Relaxation loop
+	% Relaxation loop
 	while isempty(active_sites) == false
 		n_as = size(active_sites,1); % Number of active sites
 		count = count + n_as;
+		duration = duration +1;
 		z(active_sites) = z(active_sites) - q;
 
 		% Sites to the (l/r/u/d) of an active site
@@ -74,19 +70,15 @@ while events < steps + wait_tmp
 		% Stocasticity
 		% Generate random dice_roll indices
 		dice_roll = randi([1 4], q, n_as);
-
 		% Convert dice_roll indices to linear indices for matrix nn
 		row_indices = dice_roll + (0:n_as-1) * size(nn, 1);
-
 		% Get the selected elements in a vectorized manner
 		nn = nn(row_indices);
-
 		% Reshape the resulting nn matrix into a column vector
 		nn = reshape(nn, n_as * q, 1);
 
-		delta_flat = accumarray(nn,ones(n_as*q,1),[L_b^2 1]);
-
 		% Increment
+		delta_flat = accumarray(nn,ones(n_as*q,1),[L_b^2 1]);
 		delta = reshape(delta_flat,L_b,L_b);
 		z = z + delta(2:L+1,2:L+1);
 
@@ -95,11 +87,14 @@ while events < steps + wait_tmp
 
 	end
 	events = events + 1;
-    event_size(events) = count;
+	event_size(events) = count;
+	event_duration(events) = duration;
 end
 
-% end
-
-if wait_tmp ~= 0; event_size = event_size(wait_tmp+1:end); end
+% Pruning thermalization
+if wait_tmp ~= 0
+	event_size = event_size(wait_tmp+1:end);
+	event_duration = event_duration(wait_tmp+1:end);
+end
 
 end
