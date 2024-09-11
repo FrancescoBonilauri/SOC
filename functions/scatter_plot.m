@@ -3,6 +3,8 @@ function [fig] = scatter_plot(x, y, titleText, xlabelText, ylabelText)
     % x - x-axis data
     % y - y-axis data
     % titleText - title of the graph
+	% xlabelText
+	% ylabelText
 
     % Create a figure and scatter plot in log-log scale
     fig = figure;

@@ -1,11 +1,5 @@
-% function [n_active_sites , z] = BTW_PBC (L, N, steps, wait,z,event_size)
-%
-%     arguments
-%         L (1,1) double = 50
-%         steps (1,1) double = 10e4
-%         wait (1,1) double = 10e3
-%     end
-
+% Script with code to simulate the BTW model with periodic
+% boundary conditions and fixed particle number
 % Initialization
 
 % Parameters

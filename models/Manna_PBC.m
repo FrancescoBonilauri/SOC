@@ -1,16 +1,11 @@
-% function [n_active_sites , z] = BTW_PBC (L, N, steps, wait,z,n_active_sites)
-%
-%     arguments
-%         L (1,1) double = 50
-%         steps (1,1) double = 10e4
-%         wait (1,1) double = 10e3
-%     end
+% Script with code to simulate the ABELLIAN Manna model with periodic
+% boundary conditions and fixed particle number
 
 % Initialization
 
 % Parameters
 %rng(0, 'twister');							% Sets the seed and uses Mersenne Twister.
-q = 4;
+q = 2;
 z_c = q - 1;										% Critical height
 
 % Create the lattice if it wasn't passed down as a variable
