@@ -1,4 +1,4 @@
-function [fig,exponent] = plot_avalanches(x, y, xline1, xline2, titleText, subtitleText,xname)
+function exponent = plot_avalanches(x, y, xline1, xline2, titleText, subtitleText,xname)
 % Inputs:
 % x - x-axis data
 % y - y-axis data
@@ -13,8 +13,9 @@ else
 	xlabelText = "Avalanche size"; 
 end
 
+if titleText == "Manna_abellian model"; titleText = "Abellian Manna model";end
+
 % Create a figure and scatter plot in log-log scale
-fig = figure;
 loglog(x, y, '.', 'MarkerSize', 6, 'LineWidth', 1.5);  % scatter plot, circle markers
 hold on;
 
